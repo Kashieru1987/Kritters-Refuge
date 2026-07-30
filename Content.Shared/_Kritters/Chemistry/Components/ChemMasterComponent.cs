@@ -1,15 +1,15 @@
-using Content.Server.Chemistry.EntitySystems;
 using Content.Shared.Chemistry;
+using Content.Shared.Chemistry.EntitySystems;
 using Robust.Shared.Audio;
 
-namespace Content.Server.Chemistry.Components
+namespace Content.Shared.Chemistry.Components
 {
     /// <summary>
     /// An industrial grade chemical manipulator with pill and bottle production included.
     /// <seealso cref="ChemMasterSystem"/>
     /// </summary>
     [RegisterComponent]
-    [Access(typeof(ChemMasterSystem))]
+    [Access(typeof(SharedChemMasterSystem))]
     public sealed partial class ChemMasterComponent : Component
     {
         [DataField("pillType"), ViewVariables(VVAccess.ReadWrite)]
