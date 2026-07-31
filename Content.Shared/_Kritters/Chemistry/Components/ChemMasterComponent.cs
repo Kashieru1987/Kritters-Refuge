@@ -1,6 +1,7 @@
 using Content.Shared.Chemistry;
 using Content.Shared.Chemistry.EntitySystems;
 using Robust.Shared.Audio;
+using Robust.Shared.GameStates;
 
 namespace Content.Shared.Chemistry.Components
 {
@@ -10,27 +11,29 @@ namespace Content.Shared.Chemistry.Components
     /// </summary>
     [RegisterComponent]
     [Access(typeof(SharedChemMasterSystem))]
+    [NetworkedComponent]
+    [AutoGenerateComponentState(raiseAfterAutoHandleState: true)]
     public sealed partial class ChemMasterComponent : Component
     {
-        [DataField("pillType"), ViewVariables(VVAccess.ReadWrite)]
+        [DataField("pillType"), ViewVariables(VVAccess.ReadWrite), AutoNetworkedField]
         public uint PillType = 0;
 
-        [DataField("mode"), ViewVariables(VVAccess.ReadWrite)]
+        [DataField("mode"), ViewVariables(VVAccess.ReadWrite), AutoNetworkedField]
         public ChemMasterMode Mode = ChemMasterMode.Transfer;
 
-        [DataField]
+        [DataField, AutoNetworkedField]
         public ChemMasterSortingType SortingType = ChemMasterSortingType.None;
 
-        [DataField("pillDosageLimit", required: true), ViewVariables(VVAccess.ReadWrite)]
+        [DataField("pillDosageLimit", required: true), ViewVariables(VVAccess.ReadWrite), AutoNetworkedField]
         public uint PillDosageLimit;
 
-        [DataField("clickSound"), ViewVariables(VVAccess.ReadWrite)]
+        [DataField("clickSound"), ViewVariables(VVAccess.ReadWrite), AutoNetworkedField]
         public SoundSpecifier ClickSound = new SoundPathSpecifier("/Audio/Machines/machine_switch.ogg");
 
         /// <summary>
         /// Which source the chem master should draw from when making pills/bottles.
         /// </summary>
-        [DataField]
+        [DataField, AutoNetworkedField]
         public ChemMasterDrawSource DrawSource = ChemMasterDrawSource.Internal;
     }
 }

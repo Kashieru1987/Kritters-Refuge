@@ -4,4 +4,4 @@ using Content.Shared.Chemistry.EntitySystems;
 
 namespace Content.Server.Chemistry.EntitySystems;
 
-public sealed class ChemMasterSystem : SharedChemMasterSystem;
+public sealed partial class ChemMasterSystem : SharedChemMasterSystem;

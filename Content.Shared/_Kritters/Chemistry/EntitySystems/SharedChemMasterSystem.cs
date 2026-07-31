@@ -404,5 +404,7 @@ namespace Content.Shared.Chemistry.EntitySystems
             };
         }
 
+        public virtual void UpdateUi(EntityUid uid) { }
+
     }
 };
