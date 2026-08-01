@@ -15,12 +15,14 @@ using JetBrains.Annotations;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
+using Robust.Shared.Timing;
 
 namespace Content.Shared.Chemistry.EntitySystems
 {
     [UsedImplicitly]
     public abstract partial class SharedChemMasterSystem : EntitySystem
     {
+        [Dependency] private IGameTiming _timing = default!;
         [Dependency] private SharedPopupSystem _popupSystem = default!;
         [Dependency] private SharedAudioSystem _audioSystem = default!;
         [Dependency] private SharedSolutionContainerSystem _solutionContainerSystem = default!;
@@ -37,10 +39,10 @@ namespace Content.Shared.Chemistry.EntitySystems
             base.Initialize();
 
             SubscribeLocalEvent<ChemMasterComponent, ComponentStartup>(SubscribeUpdateUiState);
-            SubscribeLocalEvent<ChemMasterComponent, SolutionContainerChangedEvent>(SubscribeUpdateUiState);
-            SubscribeLocalEvent<ChemMasterComponent, EntInsertedIntoContainerMessage>(SubscribeUpdateUiState);
-            SubscribeLocalEvent<ChemMasterComponent, EntRemovedFromContainerMessage>(SubscribeUpdateUiState);
-            SubscribeLocalEvent<ChemMasterComponent, BoundUIOpenedEvent>(SubscribeUpdateUiState);
+            SubscribeLocalEvent<ChemMasterComponent, SolutionContainerChangedEvent>(SubscribeUpdateUiState1);
+            SubscribeLocalEvent<ChemMasterComponent, EntInsertedIntoContainerMessage>(SubscribeUpdateUiState2);
+            SubscribeLocalEvent<ChemMasterComponent, EntRemovedFromContainerMessage>(SubscribeUpdateUiState3);
+            SubscribeLocalEvent<ChemMasterComponent, BoundUIOpenedEvent>(SubscribeUpdateUiState4);
 
             SubscribeLocalEvent<ChemMasterComponent, ChemMasterSetModeMessage>(OnSetModeMessage);
             SubscribeLocalEvent<ChemMasterComponent, ChemMasterSortingTypeCycleMessage>(OnCycleSortingTypeMessage);
@@ -49,11 +51,38 @@ namespace Content.Shared.Chemistry.EntitySystems
             SubscribeLocalEvent<ChemMasterComponent, ChemMasterCreatePillsMessage>(OnCreatePillsMessage);
             SubscribeLocalEvent<ChemMasterComponent, ChemMasterOutputToBottleMessage>(OnOutputToBottleMessage);
             SubscribeLocalEvent<ChemMasterComponent, ChemMasterOutputDrawSourceMessage>(OnSetDrawSourceMessage);
+
+            Logger.Info("Subscribed to events");
         }
+
+
 
         private void SubscribeUpdateUiState<T>(Entity<ChemMasterComponent> ent, ref T ev)
         {
             UpdateUiState(ent);
+            Logger.Info("Master Window Updated");
+        }
+        private void SubscribeUpdateUiState1<T>(Entity<ChemMasterComponent> ent, ref T ev)
+        {
+            UpdateUiState(ent);
+            Logger.Info("Master Window Updated 1");
+        }
+        private void SubscribeUpdateUiState2<T>(Entity<ChemMasterComponent> ent, ref T ev)
+        {
+            UpdateUiState(ent);
+            Logger.Info("Master Window Updated 2");
+        }
+
+        private void SubscribeUpdateUiState3<T>(Entity<ChemMasterComponent> ent, ref T ev)
+        {
+            UpdateUiState(ent);
+            Logger.Info("Master Window Updated 3");
+        }
+
+        private void SubscribeUpdateUiState4<T>(Entity<ChemMasterComponent> ent, ref T ev)
+        {
+            UpdateUiState(ent);
+            Logger.Info("Master Window Updated 4");
         }
 
         private void UpdateUiState(Entity<ChemMasterComponent> ent, bool updateLabel = false)
@@ -76,22 +105,29 @@ namespace Content.Shared.Chemistry.EntitySystems
 
         private void OnSetModeMessage(Entity<ChemMasterComponent> chemMaster, ref ChemMasterSetModeMessage message)
         {
+
             // Ensure the mode is valid, either Transfer or Discard.
             if (!Enum.IsDefined(typeof(ChemMasterMode), message.ChemMasterMode))
                 return;
 
             chemMaster.Comp.Mode = message.ChemMasterMode;
+            Dirty(chemMaster);
+
             UpdateUiState(chemMaster);
             ClickSound(chemMaster);
+            Logger.Info("Mode Set");
         }
 
         private void OnCycleSortingTypeMessage(Entity<ChemMasterComponent> chemMaster, ref ChemMasterSortingTypeCycleMessage message)
         {
+
             chemMaster.Comp.SortingType++;
+            Dirty(chemMaster);
             if (chemMaster.Comp.SortingType > ChemMasterSortingType.Latest)
                 chemMaster.Comp.SortingType = ChemMasterSortingType.None;
             UpdateUiState(chemMaster);
             ClickSound(chemMaster);
+            Logger.Info("Sorting Type Cycled");
         }
         private void OnSetPillTypeMessage(Entity<ChemMasterComponent> chemMaster, ref ChemMasterSetPillTypeMessage message)
         {
@@ -100,13 +136,16 @@ namespace Content.Shared.Chemistry.EntitySystems
                 return;
 
             chemMaster.Comp.PillType = message.PillType;
+            Dirty(chemMaster);
             UpdateUiState(chemMaster);
             ClickSound(chemMaster);
+            Logger.Info("Pill Type Set");
         }
 
 
         private void OnReagentButtonMessage(Entity<ChemMasterComponent> chemMaster, ref ChemMasterReagentAmountButtonMessage message)
         {
+
             // Ensure the amount corresponds to one of the reagent amount buttons.
             if (!Enum.IsDefined(typeof(ChemMasterReagentAmount), message.Amount))
                 return;
@@ -125,6 +164,7 @@ namespace Content.Shared.Chemistry.EntitySystems
             }
 
             ClickSound(chemMaster);
+            Logger.Info("Reagent Button Pressed");
         }
 
         private void OnSetDrawSourceMessage(Entity<ChemMasterComponent> chemMaster, ref ChemMasterOutputDrawSourceMessage message)
@@ -134,8 +174,11 @@ namespace Content.Shared.Chemistry.EntitySystems
                 return;
 
             chemMaster.Comp.DrawSource = message.DrawSource;
+            Dirty(chemMaster);
+
             UpdateUiState(chemMaster);
             ClickSound(chemMaster);
+            Logger.Info("Pill Draw Source Set");
         }
 
         private void TransferReagents(Entity<ChemMasterComponent> chemMaster, ReagentId id, FixedPoint2 amount, bool fromBuffer)
@@ -162,6 +205,7 @@ namespace Content.Shared.Chemistry.EntitySystems
             }
 
             UpdateUiState(chemMaster, updateLabel: true);
+            Logger.Info("Reagent Transferred");
         }
 
         private void DiscardReagents(Entity<ChemMasterComponent> chemMaster, ReagentId id, FixedPoint2 amount, bool fromBuffer)
@@ -186,6 +230,7 @@ namespace Content.Shared.Chemistry.EntitySystems
             }
 
             UpdateUiState(chemMaster, updateLabel: fromBuffer);
+            Logger.Info("Reagent Discarded");
         }
 
         private void OnCreatePillsMessage(Entity<ChemMasterComponent> chemMaster, ref ChemMasterCreatePillsMessage message)
@@ -242,6 +287,7 @@ namespace Content.Shared.Chemistry.EntitySystems
 
             UpdateUiState(chemMaster);
             ClickSound(chemMaster);
+            Logger.Info("Pills Created");
         }
         private void OnOutputToBottleMessage(Entity<ChemMasterComponent> chemMaster, ref ChemMasterOutputToBottleMessage message)
         {
@@ -273,6 +319,7 @@ namespace Content.Shared.Chemistry.EntitySystems
 
             UpdateUiState(chemMaster);
             ClickSound(chemMaster);
+            Logger.Info("Botles Created");
         }
 
         private bool WithdrawFromSource(
@@ -295,14 +342,14 @@ namespace Content.Shared.Chemistry.EntitySystems
                     if (solution.Volume == 0)
                     {
                         if (user is { } uid)
-                            _popupSystem.PopupCursor(Loc.GetString("chem-master-window-buffer-empty-text"), uid);
+                            _popupSystem.PopupPredictedCursor(Loc.GetString("chem-master-window-buffer-empty-text"), uid);
 
                         return false;
                     }
                     if (neededVolume > solution.Volume)
                     {
                         if (user is { } uid)
-                            _popupSystem.PopupCursor(Loc.GetString("chem-master-window-buffer-low-text"), uid);
+                            _popupSystem.PopupPredictedCursor(Loc.GetString("chem-master-window-buffer-low-text"), uid);
 
                         return false;
                     }
@@ -313,7 +360,7 @@ namespace Content.Shared.Chemistry.EntitySystems
                     if (_itemSlotsSystem.GetItemOrNull(chemMaster, SharedChemMaster.InputSlotName) is not { } container)
                     {
                         if (user.HasValue)
-                            _popupSystem.PopupCursor(Loc.GetString("chem-master-window-no-beaker-text"), user.Value);
+                            _popupSystem.PopupPredictedCursor(Loc.GetString("chem-master-window-no-beaker-text"), user.Value);
                         return false;
                     }
 
@@ -323,14 +370,14 @@ namespace Content.Shared.Chemistry.EntitySystems
                     if (solution.Volume == 0)
                     {
                         if (user is { } uid)
-                            _popupSystem.PopupCursor(Loc.GetString("chem-master-window-beaker-empty-text"), uid);
+                            _popupSystem.PopupPredictedCursor(Loc.GetString("chem-master-window-beaker-empty-text"), uid);
 
                         return false;
                     }
                     if (neededVolume > solution.Volume)
                     {
                         if (user is { } uid)
-                            _popupSystem.PopupCursor(Loc.GetString("chem-master-window-beaker-low-text"), uid);
+                            _popupSystem.PopupPredictedCursor(Loc.GetString("chem-master-window-beaker-low-text"), uid);
 
                         return false;
                     }
@@ -351,7 +398,8 @@ namespace Content.Shared.Chemistry.EntitySystems
 
         private void ClickSound(Entity<ChemMasterComponent> chemMaster)
         {
-            _audioSystem.PlayPvs(chemMaster.Comp.ClickSound, chemMaster, AudioParams.Default.WithVolume(-2f));
+            // _audioSystem.PlayPvs(chemMaster.Comp.ClickSound, chemMaster, AudioParams.Default.WithVolume(-2f));
+            _audioSystem.PlayPredicted(chemMaster.Comp.ClickSound, chemMaster, null, AudioParams.Default.WithVolume(-2f));
         }
 
         private ContainerInfo? BuildInputContainerInfo(EntityUid? container)

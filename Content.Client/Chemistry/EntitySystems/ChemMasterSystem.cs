@@ -13,7 +13,6 @@ public sealed partial class ChemMasterSystem : SharedChemMasterSystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<ChemMasterComponent, AfterAutoHandleStateEvent>(OnAfterAutoHandleState);
     }
 
     private void OnAfterAutoHandleState(Entity<ChemMasterComponent> ent, ref AfterAutoHandleStateEvent args)
